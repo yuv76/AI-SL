@@ -48,14 +48,15 @@ class ASLDataset(Dataset):
         class_id = self.class_map[class_name]
 
 
-        # allows us to change the ordering of the dimensions of a torch tensor so that it will be
-        # (Channels, Width, Height) and not (Width, Height, Channels) like in numpy.
-        # (Width -> 0), (Height->1), (Channels->2)
-        # more explanation here: https://medium.com/analytics-vidhya/creating-a-custom-dataset-and-dataloader-in-pytorch-76f210a1df5d#:~:text=Torch%20convolutions%20require,2nd%20dimension%20first.
-        #img_tensor = img_tensor.permute(1, 0, 2)
+        transform = transforms.Compose([
+            #transforms.RandomHorizontalFlip(p=0.5),  # randomly flip the image horizontally with a 50% chance
+            #transforms.RandomVerticalFlip(p=0.5),    # randomly flip the image vertically with a 50% chance
+            transforms.ToTensor(),  # Converts image to a Tensor in the range [0, 1]
+            transforms.Normalize((0.5,), (0.5,))   
+        ])
 
-        # get image as a tensor (multi dimensional array)
-        img_tensor = torch.from_numpy(img).unsqueeze(0)  # Adds a channel dimension (1, 64, 64)
+        # Apply the transformation to the image
+        img_tensor = transform(img)
 
         return img_tensor.float(), torch.tensor(class_id, dtype=torch.long)
 
@@ -96,8 +97,8 @@ def check_accuracy(loader, model,device):
 
 
 if __name__ == "__main__":
-    TEST_DATA_PATH = "Dataset\\mydata\\test_set\\"
-    TRAIN_DATA_PATH = "Dataset\\mydata\\training_set\\"
+    TEST_DATA_PATH = "mydata\\test_set\\"
+    TRAIN_DATA_PATH = "mydata\\training_set\\"
 
     # use the gpu (if a gpu is present)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -146,3 +147,6 @@ if __name__ == "__main__":
     # Final accuracy check on training and test sets
     check_accuracy(train_loader, model,device)
     check_accuracy(test_loader, model,device)
+
+    torch.save(model.state_dict(), 'model_weights.pth')
+    print("Model saved")
