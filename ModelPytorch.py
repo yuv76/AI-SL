@@ -6,6 +6,7 @@ from torch import optim
 from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import SoftMaxDIY
 
 
 class CNN(nn.Module):
@@ -41,7 +42,8 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(128 * 8 * 8, 256)
         self.drop = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(256, num_classes)
-        self.softmax = nn.Softmax(1)
+        self.softmax = SoftMaxDIY.DiySoftMax()
+
 
     def forward(self, x):
         """
