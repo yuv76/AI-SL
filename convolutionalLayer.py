@@ -1,4 +1,5 @@
 from torch import nn
+import torch.nn.functional
 import torch
 
 class DiyConvolution(nn.Module):
@@ -14,12 +15,12 @@ class DiyConvolution(nn.Module):
         weights = torch.tensor(self.k_size*self.k_size*self.in_channels*self.out_channels)
         weights = weights.view(self.in_channels, self.out_channels, self.kernel_size, self.kernel_size)
         self.weights = nn.Parameter(weights)
-        torch.nn.init.normal_(tensor, mean=0.0, std=1.0)
+        torch.nn.init.normal_(self.weights, mean=0.0, std=1.0)
 
         # define the bias
         bias = torch.tensor(self.out_channels)
         self.bias = nn.Parameter(bias)
-        torch.nn.init.normal_(tensor, mean=0.0, std=1.0)
+        torch.nn.init.normal_(self.weights, mean=0.0, std=1.0)
 
     def forward(self, tensor):
         """
