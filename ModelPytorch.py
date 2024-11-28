@@ -7,6 +7,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import SoftMaxDIY
+import diyMaxPooling
 
 
 class CNN(nn.Module):
@@ -25,7 +26,8 @@ class CNN(nn.Module):
         # First convolutional layer: 1 input channel, 32 output channels (32 filters), 3x3 kernel, stride 1, padding 1
         self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=32, kernel_size=3, stride=1, padding=1)
         # Max pooling layer: 2x2 window, stride 2
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        #self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.pool = diyMaxPooling.DiyMaxPooling(kernel_size=2, stride=2)
         self.norm1 = nn.BatchNorm2d(num_features=32)
 
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
