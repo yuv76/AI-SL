@@ -12,13 +12,13 @@ class DiyConvolution(nn.Module):
         self.padding = padding
 
         # define the weight
-        weights = torch.tensor(self.k_size*self.k_size*self.in_channels*self.out_channels)
-        weights = weights.view(self.in_channels, self.out_channels, self.kernel_size, self.kernel_size)
+        weights = torch.zeros(self.k_size*self.k_size*self.in_channels*self.out_channels)
+        weights = weights.view(self.in_channels, self.out_channels, self.k_size, self.k_size)
         self.weights = nn.Parameter(weights)
         torch.nn.init.normal_(self.weights, mean=0.0, std=1.0)
 
         # define the bias
-        bias = torch.tensor(self.out_channels)
+        bias = torch.zeros(self.out_channels)
         self.bias = nn.Parameter(bias)
         torch.nn.init.normal_(self.weights, mean=0.0, std=1.0)
 
@@ -53,14 +53,14 @@ class DiyConvolution(nn.Module):
 
         batch_size, channels, height, width = padded_tensor.shape
 
-        output_height = (height - self.kernel_size) // self.my_stride + 1
-        output_width = (width - self.kernel_size) // self.my_stride + 1
+        output_height = (height - self.k_size) // self.stride + 1
+        output_width = (width - self.k_size) // self.stride + 1
 
         #output_tensor = torch.zeros(batch_size, channels, output_height, output_width, device=tensor.device)
 
         # separate the tensor to patches in the size of the kernel, dims batch_size x (channels * kernel_size * kernel_size) x (output_height * output_width)
-        unfolded_tensor = torch.nn.functional.unfold(tensor, kernel_size=(self.kernel_size, self.kernel_size), stride=self.my_stride)
-        unfolded = unfolded_tensor.view(batch_size, channels, self.kernel_size*self.kernel_size, -1)
+        unfolded_tensor = torch.nn.functional.unfold(tensor, kernel_size=(self.k_size, self.k_size), stride=self.stride)
+        unfolded = unfolded_tensor.view(batch_size, channels, self.k_size*self.k_size, -1)
 
         output_tensor = torch.sum(unfolded * self.weights) + self.bias
 
