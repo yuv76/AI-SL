@@ -188,7 +188,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=Constants.LEARNING_RATE)
 
-    train_accuracies, valid_accuracies = train_model(model,train_loader,test_loader,device,optimizer,Constants.PATIENCE)
+    train_accuracies, valid_accuracies = train_model(model,train_loader,validation_loader,device,optimizer,Constants.PATIENCE)
 
     print("FINALE ACCURACY:")
     # Final accuracy check on training and test sets
