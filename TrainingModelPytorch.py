@@ -13,7 +13,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-
 class ASLDataset(Dataset):
     def __init__(self, path):
         self.imgs_path = path
