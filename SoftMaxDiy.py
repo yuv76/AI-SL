@@ -18,9 +18,14 @@ class DiySoftMax(nn.Module):
         """
         #dim =1 => for each row (dim =0 is for each collum), we want it to be for each row, rather then for each collum because each row represents one
         #  feature (each row is  the result of one filter after the convulotion and the max pooling)
-        # keepdim - dont get rid of the collums after this  
-        exp_tensor = torch.exp(tensor - torch.max(tensor, dim=1,keepdim=True)[0])
-        sum_exp = torch.sum(exp_tensor, dim=1,keepdim=True)
+        # if tensor has 1 dim, dim=1 will not be needed and wont work
+        if tensor.dim() == 1:
+            exp_tensor = torch.exp(tensor - torch.max(tensor))  # No dim=1 for 1D
+            sum_exp = torch.sum(exp_tensor)
+        else:
+            # keepdim - dont get rid of the collums after this
+            exp_tensor = torch.exp(tensor - torch.max(tensor, dim=1, keepdim=True)[0])
+            sum_exp = torch.sum(exp_tensor, dim=1,keepdim=True)
 
         return torch.div(exp_tensor, sum_exp)
 
