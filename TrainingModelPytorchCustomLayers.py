@@ -154,6 +154,9 @@ def train_model(model,train_loader,valid_loader, device,optimizer,max_patiance):
                 loss = checkpoint['loss']
 
             prev_val_acc = curr_val_acc
+        else:
+            print("The model didn't improve, and ran out of patience. Performing early stopping.")
+            break
     return train_accuracies, valid_accuracies
 
 
