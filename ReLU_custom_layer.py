@@ -7,5 +7,5 @@ class DiyReLU(nn.Module):
         super(DiyReLU, self).__init__()
 
     def forward(self, x):
-        return max(0, x)
+        return torch.maximum(torch.tensor(0.0), x)
 
