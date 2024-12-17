@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import removeBg
 
 import ModelPytorchReadyMade as ModelPytorch
 
@@ -35,12 +36,15 @@ def predict_from_cam(cam, model):
         # Frame into numpy array
         input_array = np.array(frame)
 
+        # remove bg (change the color of the bg to white)
+        input_array = removeBg.remove_background(input_array)
+
         # Grayscale image
         gray_image = cv2.cvtColor(input_array, cv2.COLOR_BGR2GRAY)
         # add thresholding
         ret, thresh1 = cv2.threshold(gray_image, thresh_val, 255, cv2.THRESH_BINARY_INV)
 
-        # flip image (in dataset images are flipped)
+        # flip image 
         thresh1 = cv2.flip(thresh1, 1)
 
         # Make cropped image (where the square is) and show it
@@ -53,6 +57,7 @@ def predict_from_cam(cam, model):
         # Resize to match model
         resized = cv2.resize(cropped_img, (64, 64))
         cv2.imshow('Image', resized)
+        cv2.imshow('No background', input_array)
 
         preprocess = transforms.Compose([
             transforms.ToTensor(),              # Convert to tensor
