@@ -48,8 +48,8 @@ class ASLTrainDataset(BaseDataset):
         transform = transforms.Compose([
             transforms.RandomHorizontalFlip(p=0.5),  # randomly flip the image horizontally with a 50% chance
             transforms.RandomVerticalFlip(p=0.5),    # randomly flip the image vertically with a 50% chance
-            transforms.RandomRotation(degrees=(0, 50)),
-            transforms.RandomPerspective(distortion_scale=0.2, p=0.2),
+            transforms.RandomRotation(degrees=(0, 30)),
+            #transforms.RandomPerspective(distortion_scale=0.2, p=0.2),
             transforms.ToTensor(),  # Converts image to a Tensor in the range [0, 1]
             transforms.Normalize((0.5,), (0.5,))   
         ])
