@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
-import removeBg
 
-import ModelPytorchReadyMade as ModelPytorch
+import ModelPytorchCustomLayers as ModelPytorch
+import Constants
 
 import torch
 from torchvision import transforms
@@ -10,10 +10,11 @@ import torchvision.models as models
 
 thresh_val = 190
 
+
 def load_model():
-    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=26)
+    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=Constants.NUM_CLASSES)
     # Load the saved state dictionary
-    cnn_model.load_state_dict(torch.load('model_weights.pth', map_location=torch.device('cpu')))
+    cnn_model.load_state_dict(torch.load('model_combined_#_COMBINED.pth', map_location=torch.device('cpu')))
     cnn_model.eval()
     print("Model loaded from checkpoint.")
     return cnn_model
@@ -23,7 +24,7 @@ def on_trackbar(val):
     thresh_val = val
 
 
-def predict_from_cam(cam, model):
+def predict_from_cam(cam, model, out):
     """
     Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
     in: the initialized camera feed, the loaded model.
@@ -36,15 +37,12 @@ def predict_from_cam(cam, model):
         # Frame into numpy array
         input_array = np.array(frame)
 
-        # remove bg (change the color of the bg to white)
-        input_array = removeBg.remove_background(input_array)
-
         # Grayscale image
         gray_image = cv2.cvtColor(input_array, cv2.COLOR_BGR2GRAY)
         # add thresholding
         ret, thresh1 = cv2.threshold(gray_image, thresh_val, 255, cv2.THRESH_BINARY_INV)
 
-        # flip image 
+        # flip image (in dataset images are flipped)
         thresh1 = cv2.flip(thresh1, 1)
 
         # Make cropped image (where the square is) and show it
@@ -57,7 +55,6 @@ def predict_from_cam(cam, model):
         # Resize to match model
         resized = cv2.resize(cropped_img, (64, 64))
         cv2.imshow('Image', resized)
-        cv2.imshow('No background', input_array)
 
         preprocess = transforms.Compose([
             transforms.ToTensor(),              # Convert to tensor
@@ -76,8 +73,11 @@ def predict_from_cam(cam, model):
 
         # Get predicted letter and print it
         predicted_index = np.argmax(prediction)
-        class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        class_names = list("#BCDFGHIJKLOPQRUVWXYZ")
+        #class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         predicted_letter = class_names[predicted_index]
+        if predicted_letter == '#':
+            pass
         print(f"The model predicts the letter: {predicted_letter}\n")
 
         # Write predicted letter on image
@@ -88,6 +88,10 @@ def predict_from_cam(cam, model):
 
         # Display the captured frame
         cv2.imshow('Camera', thresh1)
+
+        # Convert the thresholded frame back to BGR so it can be written to the video
+        thresholded_frame_bgr = cv2.cvtColor(thresh1, cv2.COLOR_GRAY2BGR)
+        out.write(thresholded_frame_bgr)
 
         if not created_trackbar:
             cv2.namedWindow("Camera")
@@ -109,11 +113,11 @@ if __name__ == "__main__":
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
+    out = cv2.VideoWriter('outgput.mp4', fourcc, 20.0, (frame_width, frame_height))
 
     model = load_model()
 
-    predict_from_cam(cam, model)
+    predict_from_cam(cam, model, out)
 
     # Release the capture and writer objects
     cam.release()
