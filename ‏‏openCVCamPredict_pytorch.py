@@ -1,32 +1,36 @@
 import cv2
 import numpy as np
 
-import ModelPytorch
+import ModelPytorchCustomLayers as ModelPytorch
+import Constants
 
 import torch
 from torchvision import transforms
 import torchvision.models as models
 
+thresh_val = 190
+
 
 def load_model():
-    """
-    load the trained cnn model weights from saved file
-    :return: the model
-    """
-    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=26)
+    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=Constants.NUM_CLASSES)
     # Load the saved state dictionary
-    cnn_model.load_state_dict(torch.load('model_weights.pth', map_location=torch.device('cpu')))
+    cnn_model.load_state_dict(torch.load('model_combined_#_COMBINED.pth', map_location=torch.device('cpu')))
     cnn_model.eval()
     print("Model loaded from checkpoint.")
     return cnn_model
 
+def on_trackbar(val):
+    global thresh_val
+    thresh_val = val
 
-def predict_from_cam(cam, model):
+
+def predict_from_cam(cam, model, out):
     """
     Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
     in: the initialized camera feed, the loaded model.
     out: none.
     """
+    created_trackbar = False
     while True:
         ret, frame = cam.read()
 
@@ -36,7 +40,7 @@ def predict_from_cam(cam, model):
         # Grayscale image
         gray_image = cv2.cvtColor(input_array, cv2.COLOR_BGR2GRAY)
         # add thresholding
-        ret, thresh1 = cv2.threshold(gray_image, 150, 255, cv2.THRESH_BINARY_INV)
+        ret, thresh1 = cv2.threshold(gray_image, thresh_val, 255, cv2.THRESH_BINARY_INV)
 
         # flip image (in dataset images are flipped)
         thresh1 = cv2.flip(thresh1, 1)
@@ -69,17 +73,30 @@ def predict_from_cam(cam, model):
 
         # Get predicted letter and print it
         predicted_index = np.argmax(prediction)
-        class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        class_names = list("#BCDFGHIJKLOPQRUVWXYZ")
+        #class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         predicted_letter = class_names[predicted_index]
+        if predicted_letter == '#':
+            pass
         print(f"The model predicts the letter: {predicted_letter}\n")
 
         # Write predicted letter on image
         predicted_text = f"predicted: {predicted_letter}"
         image = cv2.putText(thresh1, predicted_text, (390, 90), cv2.FONT_HERSHEY_SIMPLEX,
-                       1, (255,0,0), 2, cv2.LINE_AA)
+                1, (255,0,0), 2, cv2.LINE_AA)
+        #thresh1 = cv2.flip(thresh1, 1)
 
         # Display the captured frame
         cv2.imshow('Camera', thresh1)
+
+        # Convert the thresholded frame back to BGR so it can be written to the video
+        thresholded_frame_bgr = cv2.cvtColor(thresh1, cv2.COLOR_GRAY2BGR)
+        out.write(thresholded_frame_bgr)
+
+        if not created_trackbar:
+            cv2.namedWindow("Camera")
+            cv2.createTrackbar("Threshold", "Camera", 150, 255, on_trackbar)
+            created_trackbar = True
 
         # Press 'x' to exit the loop
         if cv2.waitKey(1) == ord('x'):
@@ -96,11 +113,11 @@ if __name__ == "__main__":
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    # out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
+    out = cv2.VideoWriter('outgput.mp4', fourcc, 20.0, (frame_width, frame_height))
 
     model = load_model()
 
-    predict_from_cam(cam, model)
+    predict_from_cam(cam, model, out)
 
     # Release the capture and writer objects
     cam.release()
