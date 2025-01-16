@@ -1,5 +1,6 @@
 INPUT_SIZE = 64*64  # 64*64 pixels (not directly used in CNN)
-NUM_CLASSES = 26  # all letters
+NUM_CLASSES = 23  # all letters
+NUM_COMBINED_CLASSES = 6  # AEMNST
 LEARNING_RATE = 0.001
 BATCH_SIZE = 128
 NUM_EPOCHS = 100
