@@ -6,15 +6,14 @@ import Constants
 
 import torch
 from torchvision import transforms
-import torchvision.models as models
 
 thresh_val = 190
 
 
-def load_model():
-    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=Constants.NUM_CLASSES)
+def load_model(model_path, num_classes):
+    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=num_classes)
     # Load the saved state dictionary
-    cnn_model.load_state_dict(torch.load('model_combined_#_COMBINED.pth', map_location=torch.device('cpu')))
+    cnn_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     cnn_model.eval()
     print("Model loaded from checkpoint.")
     return cnn_model
@@ -24,16 +23,16 @@ def on_trackbar(val):
     thresh_val = val
 
 
-def predict_from_cam(cam, model):
+def predict_from_cam(cam, model, sub_model):
     """
     Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
     in: the initialized camera feed, the loaded model.
     out: none.
     """
     created_trackbar = False
-    class_names = list("#BCD#FGHIJKL##OPQR##UVWXYZ")
-    right = 0
-    wrong = 0
+    class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    right = {chr(i): 0 for i in range(65, 91)}
+    wrong = {chr(i): 0 for i in range(65, 91)}
 
     for expected_letter in class_names:
         for frame in range(0,121):
@@ -68,15 +67,28 @@ def predict_from_cam(cam, model):
                 prediction = model(image_tensor)
                 print(prediction)
 
-            # Get predicted letter and print it
+            # Get predicted letter
             predicted_index = np.argmax(prediction)
-            class_names = list("#BCDFGHIJKLOPQRUVWXYZ")
-            predicted_letter = class_names[predicted_index]
+
+            class_names_overall = list("#BCDFGHIJKLOPQRUVWXYZ")
+            predicted_letter = class_names_overall[predicted_index]
+
+            if predicted_letter == '#':
+                # the model recognized a letter from # group, make predictions in sub model
+                with torch.no_grad():
+                    sub_prediction = sub_model(image_tensor)
+                    print("sub-prediction: " + str(sub_prediction))
+                # Get predicted letter
+                predicted_index = np.argmax(sub_prediction)
+                classes = list("AEMNST")
+                predicted_letter = classes[predicted_index]
+
+
             print(f"predicted: {predicted_letter} Expected: {expected_letter}\n")
             if expected_letter == predicted_letter:
-                right += 1
+                right[expected_letter] += 1
             else:
-                wrong += 1
+                wrong[expected_letter] += 1
 
             # Write predicted letter on image
             predicted_text = f"predicted: {predicted_letter}"
@@ -97,12 +109,14 @@ def predict_from_cam(cam, model):
             # Press 'x' to exit the loop
             if cv2.waitKey(1) == ord('x'):
                 break
-    print(f"got {right}/{right+wrong} right")
+    print(f"got {sum(right.values())}/{sum(right.values())+sum(wrong.values())} right")
+    for letter in class_names:
+        print(f"{letter}: got {right[letter]}/{right[letter]+wrong[letter]} right")
 
 
 if __name__ == "__main__":
     # Open the default camera
-    cam = cv2.VideoCapture("testvid.mp4")
+    cam = cv2.VideoCapture("testvid2.mp4")
 
     # Get the default frame width and height
     frame_width = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -111,9 +125,10 @@ if __name__ == "__main__":
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 
-    model = load_model()
+    model = load_model('model_second_try.pth', Constants.NUM_CLASSES)
+    sub_model = load_model('only_#_improve.pth', Constants.NUM_COMBINED_CLASSES)
 
-    predict_from_cam(cam, model)
+    predict_from_cam(cam, model, sub_model)
 
     # Release the capture and writer objects
     cam.release()

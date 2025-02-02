@@ -11,10 +11,10 @@ import torchvision.models as models
 thresh_val = 190
 
 
-def load_model():
-    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=Constants.NUM_CLASSES)
+def load_model(model_path, num_classes):
+    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=num_classes)
     # Load the saved state dictionary
-    cnn_model.load_state_dict(torch.load('model_combined_#_COMBINED.pth', map_location=torch.device('cpu')))
+    cnn_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     cnn_model.eval()
     print("Model loaded from checkpoint.")
     return cnn_model
@@ -24,7 +24,7 @@ def on_trackbar(val):
     thresh_val = val
 
 
-def predict_from_cam(cam, model, out):
+def predict_from_cam(cam, model, sub_model, out):
     """
     Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
     in: the initialized camera feed, the loaded model.
@@ -77,7 +77,15 @@ def predict_from_cam(cam, model, out):
         #class_names = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
         predicted_letter = class_names[predicted_index]
         if predicted_letter == '#':
-            pass
+            # the model recognized a letter from # group, make predictions in sub model
+            with torch.no_grad():
+                sub_prediction = sub_model(image_tensor)
+                print("sub-prediction: " + str(sub_prediction))
+            # Get predicted letter
+            predicted_index = np.argmax(sub_prediction)
+            grouped_classes = list("AEMNST")
+            predicted_letter = grouped_classes[predicted_index]
+
         print(f"The model predicts the letter: {predicted_letter}\n")
 
         # Write predicted letter on image
@@ -113,11 +121,12 @@ if __name__ == "__main__":
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('outgput.mp4', fourcc, 20.0, (frame_width, frame_height))
+    out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
 
-    model = load_model()
+    model = load_model('model_second_try.pth', Constants.NUM_CLASSES)
+    sub_model = load_model('only_#_improve.pth', Constants.NUM_COMBINED_CLASSES)
 
-    predict_from_cam(cam, model, out)
+    predict_from_cam(cam, model, sub_model, out)
 
     # Release the capture and writer objects
     cam.release()
