@@ -1,16 +1,12 @@
-import torch
 import torch.nn.functional as F
-import torchvision.datasets as datasets
-import torchvision.transforms as transforms
-from torch import optim
-from torch import nn
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-import SoftMaxDiy
 
-import ReLU_custom_layer
-import diyMaxPooling
-import convolutionalLayer
+from torch import nn
+
+from ASL_detect.SoftMaxDIY import DiySoftMax
+
+from ASL_detect.ReLU_custom_layer import DiyReLU
+from ASL_detect.diyMaxPooling import DiyMaxPooling
+from ASL_detect.diyConv import DiyConvolution
 
 
 class CNN(nn.Module):
@@ -27,18 +23,18 @@ class CNN(nn.Module):
         super(CNN, self).__init__()
 
         # First convolutional layer: 1 input channel, 32 output channels (32 filters), 3x3 kernel, stride 1, padding 1
-        self.conv1 = convolutionalLayer.DiyConvolution(in_channels=in_channels, out_channels=32, kernel_size=3, stride=1, padding=1)
-        self.ReLU = ReLU_custom_layer.DiyReLU()
+        self.conv1 = DiyConvolution(in_channels=in_channels, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.ReLU = DiyReLU()
 
         # Max pooling layer: 2x2 window, stride 2
-        self.pool = diyMaxPooling.DiyMaxPooling(kernel_size=2, stride=2)
+        self.pool = DiyMaxPooling(kernel_size=2, stride=2)
         self.norm1 = nn.BatchNorm2d(num_features=32)
 
-        self.conv2 = convolutionalLayer.DiyConvolution(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv2 = DiyConvolution(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1)
 
         self.norm2 = nn.BatchNorm2d(num_features=64)
 
-        self.conv3 = convolutionalLayer.DiyConvolution(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
+        self.conv3 = DiyConvolution(in_channels=64, out_channels=128, kernel_size=3, stride=1, padding=1)
 
         self.norm3 = nn.BatchNorm2d(num_features=128)
 
@@ -49,7 +45,7 @@ class CNN(nn.Module):
         self.drop = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(256, num_classes)
 
-        self.softmax = SoftMaxDiy.DiySoftMax()
+        self.softmax = DiySoftMax()
 
 
     def forward(self, x):
@@ -87,8 +83,3 @@ class CNN(nn.Module):
         x = self.softmax(x)
 
         return x
-
-
-
-
-

@@ -1,0 +1,16 @@
+README.md
+setup.py
+ASL_detect/CNN_single_image.py
+ASL_detect/Constants.py
+ASL_detect/ModelPytorchCustomLayers.py
+ASL_detect/R_CNN_single_image.py
+ASL_detect/ReLU_custom_layer.py
+ASL_detect/SoftMaxDIY.py
+ASL_detect/__init__.py
+ASL_detect/diyConv.py
+ASL_detect/diyMaxPooling.py
+ASL_detect/removeBg.py
+ASL_detect.egg-info/PKG-INFO
+ASL_detect.egg-info/SOURCES.txt
+ASL_detect.egg-info/dependency_links.txt
+ASL_detect.egg-info/top_level.txt
