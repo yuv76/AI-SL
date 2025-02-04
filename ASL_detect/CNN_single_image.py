@@ -24,9 +24,9 @@ IMAGE_LEN = 64
 
 def cnn_single_image(image, thresh_val=190):
     """
-    Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
-    in: the initialized camera feed, the loaded model.
-    out: none.
+    Feeds the model with the an image and returns the prediction.
+    in: the image, optional: threshold value (if smaller than 0, wont threshold).
+    out: the model's prediction.
     """
     model = load_model(MODEL_PATH, NUM_CLASSES)
     sub_model = load_model(SUB_MODEL_PATH, NUM_COMBINED_CLASSES)

@@ -12,9 +12,9 @@ from ASL_detect.CNN_single_image import load_model, IMAGE_LEN
 
 def r_cnn_single_image(image, thresh_val=190, min_size=150, prediction_threshold=0.9):
     """
-    Feeds the model with the output of the computer's camera and prints its prediction. Stopped by pressing 'x'.
-    in: the initialized camera feed, the loaded model.
-    out: none.
+    Gets an image and feeds it to the r-cnn model.
+    in: image, optionl: threshold value, minimum box size, prediction threshold.
+    out: list with bounding boxes, each with coordinates and a prediction.
     """
     model = load_model(MODEL_PATH, NUM_CLASSES)
     sub_model = load_model(SUB_MODEL_PATH, NUM_COMBINED_CLASSES)
@@ -73,6 +73,6 @@ def r_cnn_single_image(image, thresh_val=190, min_size=150, prediction_threshold
                 grouped_classes = list("AEMNST")
                 predicted_letter = grouped_classes[predicted_index]
 
-            boxes += (x-10, y-10, len + 10, h, predicted_letter, max_prediction*100)
+            boxes += [(x-10, y-10, len + 10, predicted_letter, max_prediction*100)]
 
     return boxes
