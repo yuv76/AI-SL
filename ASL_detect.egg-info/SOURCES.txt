@@ -1,3 +1,4 @@
+MANIFEST.in
 README.md
 setup.py
 ASL_detect/CNN_single_image.py
@@ -9,6 +10,8 @@ ASL_detect/SoftMaxDIY.py
 ASL_detect/__init__.py
 ASL_detect/diyConv.py
 ASL_detect/diyMaxPooling.py
+ASL_detect/final_submodel_used_diff_dataset.pth
+ASL_detect/model_second_try.pth
 ASL_detect/removeBg.py
 ASL_detect.egg-info/PKG-INFO
 ASL_detect.egg-info/SOURCES.txt
