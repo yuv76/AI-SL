@@ -1,23 +1,10 @@
 import cv2
 import numpy as np
-import os
 
-import ASL_detect.ModelPytorchCustomLayers as ModelPytorch
-from ASL_detect.Constants import MODEL_PATH, SUB_MODEL_PATH, NUM_CLASSES, NUM_COMBINED_CLASSES
+from .load_model import loadModel
 
 import torch
 from torchvision import transforms
-
-def load_model(model_path, num_classes):
-    cnn_model = ModelPytorch.CNN(in_channels=1, num_classes=num_classes)
-    # Load the saved state dictionary
-    if os.path.exists(model_path):
-        cnn_model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-    else:
-        raise FileNotFoundError(f"Model file not found at {model_path}")
-    cnn_model.eval()
-    return cnn_model
-
 
 IMAGE_LEN = 64
 
@@ -28,8 +15,8 @@ def cnn_single_image(image, thresh_val=190):
     in: the image, optional: threshold value (if smaller than 0, wont threshold).
     out: the model's prediction.
     """
-    model = load_model(MODEL_PATH, NUM_CLASSES)
-    sub_model = load_model(SUB_MODEL_PATH, NUM_COMBINED_CLASSES)
+    model = loadModel.get_model()
+    sub_model = loadModel.get_sub_model()
 
     if image is None:
         raise ValueError("Input image is empty or not loaded correctly.")

@@ -1,29 +1,30 @@
 import cv2
 import numpy as np
 
-from ASL_detect.Constants import MODEL_PATH, SUB_MODEL_PATH, NUM_CLASSES, NUM_COMBINED_CLASSES
-
 import torch
 from torchvision import transforms
 
-from ASL_detect.removeBg import remove_background
-from ASL_detect.CNN_single_image import load_model, IMAGE_LEN
+from ASL_detect.removeBg import process_hand_frame
+from ASL_detect.CNN_single_image import IMAGE_LEN
+from .load_model import loadModel
 
 
-def r_cnn_single_image(image, thresh_val=190, min_size=150, prediction_threshold=0.9):
+def r_cnn_single_image(image, thresh_val=190, min_size=150, prediction_threshold=0.9, removeBG=False):
     """
     Gets an image and feeds it to the r-cnn model.
     in: image, optionl: threshold value, minimum box size, prediction threshold.
     out: list with bounding boxes, each with coordinates and a prediction.
     """
-    model = load_model(MODEL_PATH, NUM_CLASSES)
-    sub_model = load_model(SUB_MODEL_PATH, NUM_COMBINED_CLASSES)
+    model = loadModel.get_model()
+    sub_model = loadModel.get_sub_model()
 
     if image is None:
         raise ValueError("Input image is empty or not loaded correctly.")
 
     image = cv2.flip(image, 1)
-    proposals = remove_background(image)
+    removed, proposals = process_hand_frame(image)
+    if removeBG:
+        image = removed
     image = cv2.flip(image, 1)
 
     # Frame into numpy array
