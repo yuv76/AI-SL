@@ -16,7 +16,7 @@ class Message:
 
 class ChatApp:
     def __init__(self):
-        self.tcpClient_chat_view = None
+        self.main_chat_view = None
         self.new_message = None
         self.current_chat_user = None
         self.user_list = None
@@ -24,7 +24,7 @@ class ChatApp:
         self.client = TCPClient()
         self.users = set()
 
-    def tcpClient(self, page: ft.Page):
+    def main(self, page: ft.Page):
         page.horizontal_alignment = "center"
         page.title = "Private Chat"
         page.theme_mode = "dark"
@@ -87,7 +87,7 @@ class ChatApp:
                 if response and response[:3] == SERVER_UPDATE_MSG_NUM:
                     chat_content, partner_username, usernames = parse_server_update_msg(response[3:])
 
-                    # Update UI in the tcpClient thread
+                    # Update UI in the main thread
                     page.invoke_async(lambda: self.update_chat_ui(
                         page, chat_content, partner_username, usernames
                     ))
@@ -102,7 +102,7 @@ class ChatApp:
 
         # Update chat content if we're viewing the relevant chat
         if partner_username == self.current_chat_user:
-            self.tcpClient_chat_view.controls.clear()
+            self.main_chat_view.controls.clear()
             if chat_content:
                 self.add_message(
                     page,
@@ -129,7 +129,7 @@ class ChatApp:
 
         def switch_chat(username):
             self.current_chat_user = username
-            self.tcpClient_chat_view.controls.clear()
+            self.main_chat_view.controls.clear()
             # Send empty message to get chat history
             update_msg = create_client_server_update_msg(username, "")
             self.client.send_message(update_msg)
@@ -144,7 +144,7 @@ class ChatApp:
         )
 
         # Chat messages view
-        self.tcpClient_chat_view = ft.ListView(
+        self.main_chat_view = ft.ListView(
             expand=True,
             spacing=10,
             auto_scroll=True,
@@ -193,7 +193,7 @@ class ChatApp:
                                         size=20,
                                         weight=ft.FontWeight.BOLD,
                                     ),
-                                    self.tcpClient_chat_view,
+                                    self.main_chat_view,
                                     ft.Row(
                                         [
                                             self.new_message,
@@ -233,7 +233,7 @@ class ChatApp:
                 )
 
     def add_message(self, page: ft.Page, message: Message):
-        self.tcpClient_chat_view.controls.append(
+        self.main_chat_view.controls.append(
             ft.Card(
                 content=ft.Container(
                     content=ft.Column(
@@ -246,7 +246,7 @@ class ChatApp:
                                     ),
                                     ft.Text(message.timestamp, color=ft.colors.GREY_500, size=12),
                                 ],
-                                alignment=ft.tcpClientAxisAlignment.SPACE_BETWEEN,
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                             ),
                             ft.Text(message.text, selectable=True),
                         ],
@@ -257,7 +257,7 @@ class ChatApp:
                 color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
             )
         )
-        self.tcpClient_chat_view.scroll_to(offset=len(self.tcpClient_chat_view.controls) * 1000)
+        self.main_chat_view.scroll_to(offset=len(self.main_chat_view.controls) * 1000)
 
 
 def main():
