@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 
 import cv2
@@ -36,6 +37,13 @@ class ChatApp:
     def listen_for_updates(self, page):
         while True:
             try:
+
+                if self.current_chat_user:
+                    update_msg = create_client_server_update_msg(self.current_chat_user, "")
+                else:
+                    update_msg = create_client_server_update_msg("", "")
+                self.client.send_message(update_msg)
+
                 response = self.client.receive_message()
                 if response and response[:3] == SERVER_UPDATE_MSG_NUM:
                     chat_content, partner_username, usernames = parse_server_update_msg(response[3:])
@@ -43,6 +51,7 @@ class ChatApp:
             except Exception as e:
                 print(f"Error in update listener: {e}")
                 break
+            time.sleep(0.5)
 
     def switch_chat(self, username):
         """Switches the current chat view to the specified user."""
@@ -51,6 +60,7 @@ class ChatApp:
         # Send empty message to get chat history
         update_msg = create_client_server_update_msg(username, "")
         self.client.send_message(update_msg)
+        time.sleep(0.5)
         self.page.update()
 
     def add_message(self, page: ft.Page, message: Message):
