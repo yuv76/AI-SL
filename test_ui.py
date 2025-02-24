@@ -1,3 +1,4 @@
+import random
 import time
 from datetime import datetime
 
@@ -22,14 +23,18 @@ class Message:
 
 class ChatApp:
     def __init__(self):
+        self.loading_indicator = ft.ProgressRing(visible=False, scale=1.5)
         self.main_chat_view = None
         self.new_message_text = ""
         self.new_message = None
         self.current_chat_user = None
         self.user_list = None
+        self.count_curr_chat_msgs = 0
         self.user_name = None
+        self.user_wait_for_switch = None
         self.client = TCPClient()
         self.users = set()
+        self.online_users_count = 0
         self.camera_running = False
         self.camera_button = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
@@ -37,7 +42,6 @@ class ChatApp:
     def listen_for_updates(self, page):
         while True:
             try:
-
                 if self.current_chat_user:
                     update_msg = create_client_server_update_msg(self.current_chat_user, "")
                 else:
@@ -45,9 +49,17 @@ class ChatApp:
                 self.client.send_message(update_msg)
 
                 response = self.client.receive_message()
+
                 if response and response[:3] == SERVER_UPDATE_MSG_NUM:
                     chat_content, partner_username, usernames = parse_server_update_msg(response[3:])
-                    self.update_chat_ui(page, chat_content, partner_username, usernames)
+
+                    if partner_username == self.user_wait_for_switch:
+                        self.user_wait_for_switch = None  # Clear flag/callback
+                        self.update_chat_ui(page, chat_content, partner_username, usernames)
+                    elif self.user_wait_for_switch is None:
+                        self.update_chat_ui(page, chat_content, partner_username, usernames)
+
+
             except Exception as e:
                 print(f"Error in update listener: {e}")
                 break
@@ -55,13 +67,17 @@ class ChatApp:
 
     def switch_chat(self, username):
         """Switches the current chat view to the specified user."""
+        self.count_curr_chat_msgs = 0
         self.current_chat_user = username
+        self.user_wait_for_switch = username
         self.main_chat_view.controls.clear()
+        self.loading_indicator.visible = True  # Show loading indicator
+        self.update_user_list(self.page, username)
+        self.page.update()
+
         # Send empty message to get chat history
         update_msg = create_client_server_update_msg(username, "")
         self.client.send_message(update_msg)
-        time.sleep(0.5)
-        self.page.update()
 
     def add_message(self, page: ft.Page, message: Message):
         self.main_chat_view.controls.append(
@@ -90,24 +106,34 @@ class ChatApp:
         )
         self.main_chat_view.scroll_to(offset=len(self.main_chat_view.controls) * 1000)
 
-
     def update_chat_ui(self, page, chat_content, partner_username, usernames):
-        # Update users list
-        self.users = set(usernames)
-        self.update_user_list(page, partner_username)
+
+        if self.users != set(usernames):
+            # Update users list
+            self.users = set(usernames)
+            self.update_user_list(page, partner_username)
+
+        if partner_username not in self.users:
+            self.main_chat_view.controls.clear()
 
         # Update chat content if we're viewing the relevant chat
-        if partner_username == self.current_chat_user:
-            self.main_chat_view.controls.clear()
-            if chat_content:
-                self.add_message(
-                    page,
-                    Message(
-                        user_name=partner_username,
-                        text=chat_content,
-                        message_type="partner_message"
-                    )
-                )
+        elif partner_username == self.current_chat_user:
+            self.loading_indicator.visible = False
+
+            if len(chat_content) > self.count_curr_chat_msgs:
+                new_count = len(chat_content)
+                chat_content = chat_content[-(new_count - self.count_curr_chat_msgs):]
+                for author, msg in chat_content:
+                    if chat_content:
+                        self.add_message(
+                            page,
+                            Message(
+                                user_name=author,
+                                text=msg,
+                                message_type="partner_message"
+                            )
+                        )
+                self.count_curr_chat_msgs = new_count
         page.update()
 
     def update_user_list(self, page, current_partner=None):
@@ -272,6 +298,7 @@ class ChatApp:
                             content=ft.Column(
                                 [
                                     ft.Text("Select a user to start chatting", size=20, weight=ft.FontWeight.BOLD),
+                                    self.loading_indicator,
                                     self.main_chat_view,
                                     ft.Row(
                                         [
@@ -301,4 +328,4 @@ class ChatApp:
 
 if __name__ == "__main__":
     app = ChatApp()
-    ft.app(target=app.main)
+    ft.app(target=app.main, port=random.randint(8550, 8650))

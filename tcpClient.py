@@ -1,13 +1,13 @@
 import socket
+import threading
+import time
+import sys
 
 bind_ip = "127.0.0.1"
 bind_port = 8876
 LOGIN_MSG_NUM = "200"
 SERVER_UPDATE_MSG_NUM = "101"
 CLIENT_UPDATE_MSG_NUM = "204"
-
-import socket
-import sys
 
 
 class TCPClient:
@@ -65,16 +65,26 @@ def extract(message, length_size):
 
 
 def parse_server_update_msg(msg):
+    def parse_chat_content(data):
+        data = data.split("&MAGSH_MESSAGE&")[1:]
+        all_msgs = list()
+        for curr_msg in data:
+            curr_msg = curr_msg.split("&")
+            author = curr_msg[curr_msg.index("Author") + 1]
+            data = curr_msg[curr_msg.index("DATA") + 1]
+            all_msgs.append((author,data))
+        return all_msgs
+
     chat_content, msg = extract(msg, 5)
     partner_username, msg = extract(msg, 2)
     usernames_str, _ = extract(msg, 5)
-
+    if len(chat_content) !=0:
+        chat_content = parse_chat_content(chat_content)
     return chat_content, partner_username, usernames_str.split('&')
 
 
 def create_client_server_update_msg(second_username, new_msg):
     return CLIENT_UPDATE_MSG_NUM + "%02d" % len(second_username) + second_username + "%05d" % len(new_msg) + new_msg
-
 
 
 def main():
