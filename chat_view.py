@@ -1,24 +1,11 @@
-import random
-import time
-from datetime import datetime
-
-import cv2
 import threading
+import time
+
 import flet as ft
-import base64
-import numpy as np
-from io import BytesIO
-from PIL import Image
+
+from CameraService import CameraService
+from Message import Message
 from tcpClient import TCPClient, parse_server_update_msg, create_client_server_update_msg, SERVER_UPDATE_MSG_NUM
-from wordMakerForChat import SignLanguageWordMaker
-
-
-class Message:
-    def __init__(self, user_name: str, text: str, message_type: str):
-        self.user_name = user_name
-        self.text = text
-        self.message_type = message_type
-        self.timestamp = datetime.now().strftime("%H:%M")
 
 
 class ChatApp:
@@ -35,10 +22,10 @@ class ChatApp:
         self.client = TCPClient()
         self.users = set()
         self.online_users_count = 0
-        self.camera_running = False
+        self.cam_service = None
+        self.page = None
         self.camera_button = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
-
     def listen_for_updates(self, page):
         while True:
             try:
@@ -149,51 +136,6 @@ class ChatApp:
                     )
                 )
 
-    def start_camera(self):
-        cap = cv2.VideoCapture(0)
-        wordMaker = SignLanguageWordMaker()
-        while self.camera_running:
-            frame, letter = wordMaker.predict_once_from_cam(cap)
-
-            self.new_message.value += letter
-            self.new_message_text += letter
-            self.new_message.update()
-
-            # Convert frame to Base64
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img_pil = Image.fromarray(frame)
-            buffer = BytesIO()
-            img_pil.save(buffer, format="JPEG")
-            img_b64 = base64.b64encode(buffer.getvalue()).decode()
-
-            # Update Flet UI
-            if self.camera_running:
-                self.camera_image.src_base64 = img_b64
-                self.page.update()
-
-        cap.release()
-
-    def toggle_camera(self, e):
-        if not self.camera_running:
-            self.camera_running = True
-            threading.Thread(target=self.start_camera, daemon=True).start()
-            self.camera_button.text = "Stop Camera"
-        else:
-            self.camera_running = False
-            self.camera_button.text = "Start Camera"
-
-            # update image to indicate cam not running
-            img = cv2.imread("nocam.png")
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            img_pil = Image.fromarray(img)
-            buffer = BytesIO()
-            img_pil.save(buffer, format="JPEG")
-            img_b64 = base64.b64encode(buffer.getvalue()).decode()
-
-            # Update Flet UI
-            self.camera_image.src_base64 = img_b64
-            self.page.update()
-
     def main(self, page: ft.Page):
         self.page = page  # Store page reference for updates
         page.horizontal_alignment = "center"
@@ -271,7 +213,9 @@ class ChatApp:
         )
 
         # Camera Button
-        self.camera_button = ft.ElevatedButton("Start Camera", on_click=self.toggle_camera)
+        self.camera_button = ft.ElevatedButton("Start Camera")
+        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button)
+        self.camera_button.on_click = self.cam_service.toggle_camera
 
         # Layout
         page.add(
@@ -324,8 +268,3 @@ class ChatApp:
                 spacing=10,
             )
         )
-
-
-if __name__ == "__main__":
-    app = ChatApp()
-    ft.app(target=app.main, port=random.randint(8550, 8650))
