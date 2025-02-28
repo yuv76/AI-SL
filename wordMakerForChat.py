@@ -13,7 +13,7 @@ class SignLanguageWordMaker:
         self.last_prediction = ""
         self.prediction_start_time = 0
 
-    def predict_once_from_cam(self, cam):
+    def predict_once_from_cam(self, cam, lower=False):
         # created_trackbar = False - should add
         ret, frame = cam.read()
         final_letter = ''
@@ -44,6 +44,8 @@ class SignLanguageWordMaker:
                     countdown_text = f"Hold sign for {self.countdown_duration}s"
 
                 # Draw information on display frame
+                if lower:
+                    letter = letter.lower()
                 predicted_text = f"{letter} {maxPredictionVal:.2f}%"
                 image = cv2.putText(output_image, predicted_text, (x - 15, y - 15), cv2.FONT_HERSHEY_SIMPLEX,
                             1, (255,0,0), 2, cv2.LINE_AA)
@@ -58,4 +60,6 @@ class SignLanguageWordMaker:
                                  self.thresh_val, 255, lambda x: setattr(self, 'thresh_val', x))
             created_trackbar = True"""
 
+        if lower:
+            final_letter = final_letter.lower()
         return output_image, final_letter

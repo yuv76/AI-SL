@@ -7,19 +7,21 @@ from wordMakerForChat import SignLanguageWordMaker
 
 
 class CameraService:
-    def __init__(self, new_message, camera_image, page, camera_button):
+    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button):
         self.camera_button = camera_button
         self.camera_running = False
         self.new_message = new_message
         self.new_message_text = ""
         self.camera_image = camera_image
         self.page = page
+        self.lowercase_button = lowercase_button
+        self.is_lower = False if lowercase_button.text == "lower" else true
 
     def start_camera(self):
         cap = cv2.VideoCapture(0)
         wordMaker = SignLanguageWordMaker()
         while self.camera_running:
-            frame, letter = wordMaker.predict_once_from_cam(cap)
+            frame, letter = wordMaker.predict_once_from_cam(cap, self.is_lower)
 
             self.new_message.value += letter
             self.new_message_text += letter
@@ -59,3 +61,11 @@ class CameraService:
             # Update Flet UI
             self.camera_image.src_base64 = img_b64
             self.page.update()
+
+    def toggle_lowercase(self, e):
+        if self.is_lower:
+            self.lowercase_button.text = "lower"
+            self.is_lower = False
+        else:
+            self.lowercase_button.text = "upper"
+            self.is_lower = True

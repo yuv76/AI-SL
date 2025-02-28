@@ -25,7 +25,9 @@ class ChatApp:
         self.cam_service = None
         self.page = None
         self.camera_button = None
+        self.lowercase = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
+
     def listen_for_updates(self, page):
         while True:
             try:
@@ -214,8 +216,10 @@ class ChatApp:
 
         # Camera Button
         self.camera_button = ft.ElevatedButton("Start Camera")
-        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button)
+        self.lowercase = ft.ElevatedButton("lower")
+        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase)
         self.camera_button.on_click = self.cam_service.toggle_camera
+        self.lowercase.on_click = self.cam_service.toggle_lowercase
 
         # Layout
         page.add(
@@ -228,6 +232,7 @@ class ChatApp:
                                     ft.Text("Users Online", size=20, weight=ft.FontWeight.BOLD),
                                     self.user_list,
                                     self.camera_button,  # Add camera button to the UI
+                                    self.lowercase,  # Add lowercase on/off button to the UI
                                     self.camera_image,  # Add camera feed to the UI
                                 ],
                                 spacing=10,
