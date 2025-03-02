@@ -9,7 +9,7 @@ from thresholdImage import perform_threshold
 
 
 class CameraService:
-    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button, slider, thresh):
+    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button, slider, thresh, remove_back):
         self.camera_button = camera_button
         self.camera_running = False
         self.new_message = new_message
@@ -21,12 +21,14 @@ class CameraService:
         self.threshold_slider = slider
         self.threshold_button = thresh
         self.is_thresh = False if thresh.text == "Threshold" else true
+        self.background_rem = remove_back
+        self.is_removebg = False if remove_back.text == "Remove Background" else true
 
     def start_camera(self):
         cap = cv2.VideoCapture(0)
         wordMaker = SignLanguageWordMaker()
         while self.camera_running:
-            frame, letter = wordMaker.predict_once_from_cam(cap, self.is_lower, self.threshold_slider.value.__round__())
+            frame, letter = wordMaker.predict_once_from_cam(cap, self.is_lower, self.threshold_slider.value.__round__(), self.is_removebg)
 
             self.new_message.value += letter
             self.new_message_text += letter
@@ -91,3 +93,12 @@ class CameraService:
         else:
             self.threshold_button.text = "Disable Threshold"
             self.is_thresh = True
+
+    def toggle_remove_back(self, e):
+        if self.is_removebg:
+            self.background_rem.text = "Remove Background"
+            self.is_removebg = False
+        else:
+            self.background_rem.text = "Restore Background"
+            self.is_removebg = True
+

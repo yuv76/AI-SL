@@ -30,6 +30,7 @@ class ChatApp:
         self.slider_label = None
         self.slider = None
         self.threshold_button = None
+        self.back_remove = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
 
     def listen_for_updates(self, page):
@@ -73,30 +74,56 @@ class ChatApp:
         self.client.send_message(update_msg)
 
     def add_message(self, page: ft.Page, message: Message):
-        self.main_chat_view.controls.append(
-            ft.Card(
-                content=ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Row(
-                                [
-                                    ft.Text(
-                                        message.user_name,
-                                        weight=ft.FontWeight.BOLD,
-                                    ),
-                                    ft.Text(message.timestamp, color=ft.colors.GREY_500, size=12),
-                                ],
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                            ),
-                            ft.Text(message.text, selectable=True),
-                        ],
-                        spacing=5,
+        if self.current_chat_user == message.user_name:
+            self.main_chat_view.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Text(
+                                            message.user_name,
+                                            weight=ft.FontWeight.BOLD,
+                                        ),
+                                        ft.Text(message.timestamp, color=ft.colors.GREY_500, size=12),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                ),
+                                ft.Text(message.text, selectable=True),
+                            ],
+                            spacing=5,
+                        ),
+                        padding=10,
                     ),
-                    padding=10,
-                ),
-                color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
+                    color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
+                )
             )
-        )
+        else:
+            self.main_chat_view.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Text(message.timestamp, color=ft.colors.GREY_500, size=12),
+                                        ft.Text(
+                                            message.user_name,
+                                            weight=ft.FontWeight.BOLD,
+                                        ),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                ),
+                                ft.Text(message.text, selectable=True),
+                            ],
+                            spacing=5,
+                        ),
+                        padding=10,
+                    ),
+                    color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
+                )
+            )
         self.main_chat_view.scroll_to(offset=len(self.main_chat_view.controls) * 1000)
 
     def update_chat_ui(self, page, chat_content, partner_username, usernames):
@@ -228,12 +255,15 @@ class ChatApp:
         self.camera_button = ft.IconButton(icon=ft.Icons.PLAY_CIRCLE_FILL_OUTLINED, icon_color=ft.colors.GREEN_ACCENT_700, data=False, tooltip="Start camera")
         self.lowercase = ft.ElevatedButton("lower")
         self.threshold_button = ft.ElevatedButton("Threshold")
+        self.back_remove = ft.ElevatedButton("Remove Background")
         self.slider_label = ft.Text("Threshold Value: 141")
         self.slider = ft.Slider(value=141, min=0, max=255, on_change=thresh_slider_changed)
-        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase, self.slider, self.threshold_button)
+        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button,
+                                         self.lowercase, self.slider, self.threshold_button, self.back_remove)
         self.camera_button.on_click = self.cam_service.toggle_camera
         self.lowercase.on_click = self.cam_service.toggle_lowercase
         self.threshold_button.on_click = self.cam_service.toggle_thresh_btn
+        self.back_remove.on_click = self.cam_service.toggle_remove_back
 
         self.camera_options = ft.PopupMenuButton(
         items=[
@@ -242,6 +272,7 @@ class ChatApp:
                     self.slider_label,
                     self.slider,
                     ft.Row([self.lowercase, self.threshold_button]),
+                    self.back_remove
                 ])
             )
         ],
