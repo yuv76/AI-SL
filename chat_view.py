@@ -74,8 +74,10 @@ class ChatApp:
         self.client.send_message(update_msg)
 
     def add_message(self, page: ft.Page, message: Message):
-        if self.current_chat_user == message.user_name:
-            self.main_chat_view.controls.append(
+        is_logged_user = message.user_name != self.current_chat_user
+
+        self.main_chat_view.controls.append(
+            ft.Row([
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column(
@@ -90,41 +92,21 @@ class ChatApp:
                                     ],
                                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 ),
-                                ft.Text(message.text, selectable=True),
+                                ft.Text(message.text, selectable=True,),
                             ],
                             spacing=5,
                         ),
                         padding=10,
+                        width= min(700, max(100, len(message.text) * 7))
                     ),
-                    color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
+                    color=ft.colors.DEEP_PURPLE_ACCENT_700 if is_logged_user else ft.colors.GREY_800,
                 )
+                ],
+                alignment=ft.MainAxisAlignment.END if is_logged_user else ft.MainAxisAlignment.START,  # Align based on user
             )
-        else:
-            self.main_chat_view.controls.append(
-                ft.Card(
-                    content=ft.Container(
-                        content=ft.Column(
-                            [
-                                ft.Row(
-                                    [
-                                        ft.Text(message.timestamp, color=ft.colors.GREY_500, size=12),
-                                        ft.Text(
-                                            message.user_name,
-                                            weight=ft.FontWeight.BOLD,
-                                        ),
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                ),
-                                ft.Text(message.text, selectable=True),
-                            ],
-                            spacing=5,
-                        ),
-                        padding=10,
-                    ),
-                    color=ft.colors.BLUE_100 if message.message_type == "user_message" else ft.colors.GREY_800,
-                )
-            )
-        self.main_chat_view.scroll_to(offset=len(self.main_chat_view.controls) * 1000)
+        )
+
+
 
     def update_chat_ui(self, page, chat_content, partner_username, usernames):
 
