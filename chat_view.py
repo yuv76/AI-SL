@@ -26,6 +26,9 @@ class ChatApp:
         self.page = None
         self.camera_button = None
         self.lowercase = None
+        self.camera_options = None
+        self.slider_label = None
+        self.slider = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
 
     def listen_for_updates(self, page):
@@ -188,6 +191,11 @@ class ChatApp:
     def init_chat_view(self, page: ft.Page):
         """Initialize chat interface."""
 
+        def thresh_slider_changed(e):
+            self.slider_label.value = f"Threshold Value: {self.slider.value.__round__()}"
+            self.slider.value = self.slider.value.__round__()
+            page.update()
+
         def send_message_click(e):
             if self.new_message.value and self.current_chat_user:
                 update_msg = create_client_server_update_msg(self.current_chat_user, self.new_message.value)
@@ -217,9 +225,24 @@ class ChatApp:
         # Camera Button
         self.camera_button = ft.ElevatedButton("Start Camera")
         self.lowercase = ft.ElevatedButton("lower")
-        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase)
+        self.slider_label = ft.Text("Threshold Value: 141")
+        self.slider = ft.Slider(value=141, min=0, max=255, on_change=thresh_slider_changed)
+        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase, self.slider)
         self.camera_button.on_click = self.cam_service.toggle_camera
         self.lowercase.on_click = self.cam_service.toggle_lowercase
+
+        self.camera_options = ft.PopupMenuButton(
+        items=[
+            ft.PopupMenuItem(
+                content=ft.Column([
+                    self.slider_label,
+                    self.slider,
+                    self.lowercase,
+                ])
+            )
+        ]
+        )
+
 
         # Layout
         page.add(
@@ -231,8 +254,7 @@ class ChatApp:
                                 [
                                     ft.Text("Users Online", size=20, weight=ft.FontWeight.BOLD),
                                     self.user_list,
-                                    self.camera_button,  # Add camera button to the UI
-                                    self.lowercase,  # Add lowercase on/off button to the UI
+                                    ft.Row([self.camera_button, self.camera_options]),
                                     self.camera_image,  # Add camera feed to the UI
                                 ],
                                 spacing=10,

@@ -5,7 +5,6 @@ import ASL_detect
 
 class SignLanguageWordMaker:
     def __init__(self):
-        self.thresh_val = 141
         self.THRESHOLD = 0.9
         self.MIN_SIZE = 150
         self.countdown_duration = 2
@@ -13,8 +12,7 @@ class SignLanguageWordMaker:
         self.last_prediction = ""
         self.prediction_start_time = 0
 
-    def predict_once_from_cam(self, cam, lower=False):
-        # created_trackbar = False - should add
+    def predict_once_from_cam(self, cam, lower=False, thresh_val=141):
         ret, frame = cam.read()
         final_letter = ''
 
@@ -23,7 +21,7 @@ class SignLanguageWordMaker:
         output_image = cv2.flip(output_image, 1)
 
         # Get prediction
-        predictions = ASL_detect.r_cnn_single_image(frame, thresh_val=self.thresh_val, min_size=self.MIN_SIZE, removeBG=True)  # add parameters for bg removal if needed
+        predictions = ASL_detect.r_cnn_single_image(frame, thresh_val=thresh_val, min_size=self.MIN_SIZE, removeBG=True)  # add parameters for bg removal if needed
 
         current_time = time.time()
 

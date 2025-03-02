@@ -7,7 +7,7 @@ from wordMakerForChat import SignLanguageWordMaker
 
 
 class CameraService:
-    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button):
+    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button, slider):
         self.camera_button = camera_button
         self.camera_running = False
         self.new_message = new_message
@@ -16,12 +16,13 @@ class CameraService:
         self.page = page
         self.lowercase_button = lowercase_button
         self.is_lower = False if lowercase_button.text == "lower" else true
+        self.threshold_slider = slider
 
     def start_camera(self):
         cap = cv2.VideoCapture(0)
         wordMaker = SignLanguageWordMaker()
         while self.camera_running:
-            frame, letter = wordMaker.predict_once_from_cam(cap, self.is_lower)
+            frame, letter = wordMaker.predict_once_from_cam(cap, self.is_lower, self.threshold_slider.value.__round__())
 
             self.new_message.value += letter
             self.new_message_text += letter
