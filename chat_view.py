@@ -97,7 +97,7 @@ class ChatApp:
                             spacing=5,
                         ),
                         padding=10,
-                        width= min(700, max(100, len(message.text) * 7))
+                        width= min(700, max(100, len(message.text) * 10))
                     ),
                     color=ft.colors.DEEP_PURPLE_ACCENT_700 if is_logged_user else ft.colors.GREY_800,
                 )
@@ -270,6 +270,7 @@ class ChatApp:
                         content=ft.Container(
                             content=ft.Column(
                                 [
+                                    ft.Text(f"{self.user_name.value}", size=20),
                                     ft.Text("Users Online", size=20, weight=ft.FontWeight.BOLD),
                                     self.user_list,
                                     ft.Row([self.camera_options, self.camera_button]),
