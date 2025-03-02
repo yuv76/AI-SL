@@ -5,10 +5,11 @@ from io import BytesIO
 from PIL import Image
 from wordMakerForChat import SignLanguageWordMaker
 from flet import Icons, colors
+from thresholdImage import perform_threshold
 
 
 class CameraService:
-    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button, slider):
+    def __init__(self, new_message, camera_image, page, camera_button, lowercase_button, slider, thresh):
         self.camera_button = camera_button
         self.camera_running = False
         self.new_message = new_message
@@ -18,6 +19,8 @@ class CameraService:
         self.lowercase_button = lowercase_button
         self.is_lower = False if lowercase_button.text == "lower" else true
         self.threshold_slider = slider
+        self.threshold_button = thresh
+        self.is_thresh = False if thresh.text == "Threshold" else true
 
     def start_camera(self):
         cap = cv2.VideoCapture(0)
@@ -28,6 +31,9 @@ class CameraService:
             self.new_message.value += letter
             self.new_message_text += letter
             self.new_message.update()
+
+            if self.is_thresh:
+                frame = perform_threshold(frame, self.threshold_slider.value.__round__())
 
             # Convert frame to Base64
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -50,11 +56,13 @@ class CameraService:
             self.camera_button.text = "Stop Camera"
             self.camera_button.icon = Icons.PAUSE_CIRCLE_FILLED_ROUNDED
             self.camera_button.icon_color = colors.RED_ACCENT_400
+            self.camera_button.tooltip = "Stop camera"
         else:
             self.camera_running = False
             self.camera_button.text = "Start Camera"
             self.camera_button.icon = Icons.PLAY_CIRCLE_FILL_OUTLINED
             self.camera_button.icon_color = colors.GREEN_ACCENT_700
+            self.camera_button.tooltip = "Start camera"
 
             # update image to indicate cam not running
             img = cv2.imread("nocam.png")
@@ -75,3 +83,11 @@ class CameraService:
         else:
             self.lowercase_button.text = "upper"
             self.is_lower = True
+
+    def toggle_thresh_btn(self, e):
+        if self.is_thresh:
+            self.threshold_button.text = "Threshold"
+            self.is_thresh = False
+        else:
+            self.threshold_button.text = "Disable Threshold"
+            self.is_thresh = True

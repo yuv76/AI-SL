@@ -29,6 +29,7 @@ class ChatApp:
         self.camera_options = None
         self.slider_label = None
         self.slider = None
+        self.threshold_button = None
         self.camera_image = ft.Image(src="nocam.png", width=320, height=240)
 
     def listen_for_updates(self, page):
@@ -224,13 +225,15 @@ class ChatApp:
 
         # Camera Button
         #self.camera_button = ft.ElevatedButton("Start Camera")
-        self.camera_button = ft.IconButton(icon=ft.Icons.PLAY_CIRCLE_FILL_OUTLINED, icon_color=ft.colors.GREEN_ACCENT_700, data=False)
+        self.camera_button = ft.IconButton(icon=ft.Icons.PLAY_CIRCLE_FILL_OUTLINED, icon_color=ft.colors.GREEN_ACCENT_700, data=False, tooltip="Start camera")
         self.lowercase = ft.ElevatedButton("lower")
+        self.threshold_button = ft.ElevatedButton("Threshold")
         self.slider_label = ft.Text("Threshold Value: 141")
         self.slider = ft.Slider(value=141, min=0, max=255, on_change=thresh_slider_changed)
-        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase, self.slider)
+        self.cam_service = CameraService(self.new_message, self.camera_image, self.page, self.camera_button, self.lowercase, self.slider, self.threshold_button)
         self.camera_button.on_click = self.cam_service.toggle_camera
         self.lowercase.on_click = self.cam_service.toggle_lowercase
+        self.threshold_button.on_click = self.cam_service.toggle_thresh_btn
 
         self.camera_options = ft.PopupMenuButton(
         items=[
@@ -238,10 +241,11 @@ class ChatApp:
                 content=ft.Column([
                     self.slider_label,
                     self.slider,
-                    self.lowercase,
+                    ft.Row([self.lowercase, self.threshold_button]),
                 ])
             )
-        ]
+        ],
+        tooltip="Camera options"
         )
 
 
