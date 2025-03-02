@@ -223,7 +223,8 @@ class ChatApp:
         )
 
         # Camera Button
-        self.camera_button = ft.ElevatedButton("Start Camera")
+        #self.camera_button = ft.ElevatedButton("Start Camera")
+        self.camera_button = ft.IconButton(icon=ft.Icons.PLAY_CIRCLE_FILL_OUTLINED, icon_color=ft.colors.GREEN_ACCENT_700, data=False)
         self.lowercase = ft.ElevatedButton("lower")
         self.slider_label = ft.Text("Threshold Value: 141")
         self.slider = ft.Slider(value=141, min=0, max=255, on_change=thresh_slider_changed)
@@ -254,7 +255,7 @@ class ChatApp:
                                 [
                                     ft.Text("Users Online", size=20, weight=ft.FontWeight.BOLD),
                                     self.user_list,
-                                    ft.Row([self.camera_button, self.camera_options]),
+                                    ft.Row([self.camera_options, self.camera_button]),
                                     self.camera_image,  # Add camera feed to the UI
                                 ],
                                 spacing=10,

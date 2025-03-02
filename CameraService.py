@@ -4,6 +4,7 @@ import threading
 from io import BytesIO
 from PIL import Image
 from wordMakerForChat import SignLanguageWordMaker
+from flet import Icons, colors
 
 
 class CameraService:
@@ -47,9 +48,13 @@ class CameraService:
             self.camera_running = True
             threading.Thread(target=self.start_camera, daemon=True).start()
             self.camera_button.text = "Stop Camera"
+            self.camera_button.icon = Icons.PAUSE_CIRCLE_FILLED_ROUNDED
+            self.camera_button.icon_color = colors.RED_ACCENT_400
         else:
             self.camera_running = False
             self.camera_button.text = "Start Camera"
+            self.camera_button.icon = Icons.PLAY_CIRCLE_FILL_OUTLINED
+            self.camera_button.icon_color = colors.GREEN_ACCENT_700
 
             # update image to indicate cam not running
             img = cv2.imread("nocam.png")
