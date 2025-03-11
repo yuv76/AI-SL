@@ -4,7 +4,7 @@
 #include <io.h>
 #include <string>
 
-#define DB_NAME "DB_MSG_HISTORY."
+#define DB_NAME "DB_MSG_HISTORY.sqlite"
 
 DBManager::DBManager()
 {
@@ -73,7 +73,8 @@ int DBManager::chatHistoryCallback(void* data, int argc, char** argv, char** azC
 {
     std::string* history = static_cast<std::string*>(data);
     if (argc >= 2) {
-        *history += std::string(argv[0]) + ": " + argv[1]+"\n";
+        *history += argv[1];
+        //*history += std::string(argv[0]) + ": " + argv[1]+"\n";
     }
     return 0;
 }
