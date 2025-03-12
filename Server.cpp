@@ -59,10 +59,6 @@ void Server::serve(int port)
 }
 
 
-
-
-
-
 void Server::acceptClient()
 {
 
@@ -87,11 +83,22 @@ void Server::clientHandler(SOCKET clientSocket)
 	std::string username = "";
 	try 
 	{
-		// get code type
-		codeType = static_cast<MessageType>(Helper::getMessageTypeCode(clientSocket));
+		do
+		{
+			// get code type
+			codeType = static_cast<MessageType>(Helper::getMessageTypeCode(clientSocket));
 
-		// get the username
-		username = Helper::getStringPartFromSocket(clientSocket, Helper::getIntPartFromSocket(clientSocket, 2));
+			// get the username
+			username = Helper::getStringPartFromSocket(clientSocket, Helper::getIntPartFromSocket(clientSocket, 2));
+
+			if (_users.count(username))
+			{
+				Helper::send_login_msg(clientSocket, LOGIN_FAIL);
+				// wait for acknowledge message
+				Helper::getAckMsg(clientSocket);
+			}
+		} while (_users.count(username));
+
 	}
 	catch (const std::exception& e) { closesocket(clientSocket); return; }
 	try
@@ -105,17 +112,17 @@ void Server::clientHandler(SOCKET clientSocket)
 
 		// if log in
 		if (codeType == MT_CLIENT_LOG_IN)
-		{
-			// check that client isn't in the list yet
-			if (!_users.count(username))
-			{
-				std::cout << "Welcome: " + username << std::endl;
-				// add  to the set
-				_users.insert(std::pair<std::string, SOCKET>(username, clientSocket));
-			}
+		{	
+			// when stepping out of the loop, send ok to go message and add user
+			std::cout << "Welcome: " + username << std::endl;
+			// add  to the set
+			_users.insert(std::pair<std::string, SOCKET>(username, clientSocket));
+			Helper::send_login_msg(sendToSocket, LOGIN_SUCCESS);
+			// wait for acknowledge message
+			Helper::getAckMsg(clientSocket);
 			
 
-			//  send log in response
+			// send log in response
 			Helper::send_update_message_to_client(sendToSocket, data, secondUsername, getAllActiveUsersStr());
 
 			while (codeType != MT_CLIENT_FINISH && codeType != MT_CLIENT_EXIT && codeType != MT_CLIENT_DISCONNECTED)

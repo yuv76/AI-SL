@@ -35,6 +35,13 @@ void Helper::send_update_message_to_client(SOCKET sc, const string& file_content
 	sendData(sc, res);
 }
 
+void Helper::send_login_msg(SOCKET sc, MessageType status)
+{
+	const string res = std::to_string(status);
+	//TRACE("message: %s\n", res.c_str());
+	sendData(sc, res);
+}
+
 // recieve data from socket according byteSize
 // returns the data as int
 int Helper::getIntPartFromSocket(SOCKET sc, int bytesNum)
@@ -50,6 +57,14 @@ string Helper::getStringPartFromSocket(SOCKET sc, int bytesNum)
 	char* s = getPartFromSocket(sc, bytesNum, 0);
 	string res(s);
 	return res;
+}
+
+// recieve ACK message from socket
+// returns none
+void Helper::getAckMsg(SOCKET sc)
+{
+	const int ackLen = 6;
+	char* s = getPartFromSocket(sc, ackLen, 0);
 }
 
 // return string after padding zeros if necessary

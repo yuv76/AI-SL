@@ -13,6 +13,8 @@ enum MessageType : byte
 	MT_CLIENT_FINISH =207,
 	MT_CLIENT_EXIT = 208,
 	MT_SERVER_UPDATE = 101,
+	LOGIN_SUCCESS = 120,
+	LOGIN_FAIL = 121,
 };
 
 
@@ -26,8 +28,10 @@ public:
 	static std::string getStringPartFromSocket(SOCKET sc, int bytesNum);
 	static void sendData(SOCKET sc, std::string message);
 	static void send_update_message_to_client(SOCKET sc, const std::string& file_content, const std::string& second_username, const std::string& all_users);
+	static void send_login_msg(SOCKET sc, MessageType status);
 	static std::string getPaddedNumber(int num, int digits);
 	static std::string getCurrentTimestamp();
+	static void getAckMsg(SOCKET sc);
 
 private:
 	static char* getPartFromSocket(SOCKET sc, int bytesNum);
