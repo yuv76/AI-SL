@@ -38,4 +38,4 @@ client - app.py. [client branch](https://github.com/yuv76/AI-SL/tree/client_ASL_
   [![ezgif-101319c1157467](https://github.com/user-attachments/assets/886b500e-9663-4f31-aca3-e86bc4f257af)](https://youtu.be/1_T0wYiwtE0)
 
 ### Chat
-  [![chat](https://github.com/user-attachments/assets/d17282cd-6e36-4306-9171-6bbffd4abd09)]()
+  [![chat](https://github.com/user-attachments/assets/d17282cd-6e36-4306-9171-6bbffd4abd09)](https://youtu.be/-lfapyNCSpA)
