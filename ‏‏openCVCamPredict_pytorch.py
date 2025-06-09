@@ -123,8 +123,8 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (frame_width, frame_height))
 
-    model = load_model('model_second_try.pth', Constants.NUM_CLASSES)
-    sub_model = load_model('only_#_improve.pth', Constants.NUM_COMBINED_CLASSES)
+    model = load_model('final_model.pth', Constants.NUM_CLASSES)
+    sub_model = load_model('sub_model_final.pth', Constants.NUM_COMBINED_CLASSES)
 
     predict_from_cam(cam, model, sub_model, out)
 
