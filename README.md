@@ -29,8 +29,17 @@ all shown in /mydata.
 for training the model - TrainingModelPytorchCustomLayers.py. has to be run on a machine with GPU.
 for the model - ‏‏openCVCamPredict_pytorch.py.
 ### server & client
+for client - [import]() the library in library-ASL_detect. handles using the CNN model.
 server - server.sln project. [server branch](https://github.com/yuv76/AI-SL/tree/asl_chat_server).
 client - app.py. [client branch](https://github.com/yuv76/AI-SL/tree/client_ASL_chat).
+
+## Library
+Located in library-ASL_detect. an easy way to use the model and predict.
+installation:
+pip install git+https://github.com/yuv76/AI-SL.git@main#subdirectory=library-ASL_detect
+
+use:
+import ASL_detect
 
 ## Demonstrations
 (both are links to youtube videos)
