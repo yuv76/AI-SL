@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: ASL-detect
+Version: 0.1
+Summary: A simple library that uses the CNN model we created and makes it easier to use.
+Home-page: https://gitlab.com/yuv76/asl_detect.git
+Author: 1603
+Author-email: UNKNOWN
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
