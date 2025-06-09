@@ -27,6 +27,14 @@ all shown in /mydata.
 
 ## Run
 for training the model - TrainingModelPytorchCustomLayers.py. has to be run on a machine with GPU.
-for the model - 
+for the model - ‏‏openCVCamPredict_pytorch.py.
+### server & client
+server - server.sln project. [server branch](https://github.com/yuv76/AI-SL/tree/asl_chat_server).
+client - app.py. [client branch](https://github.com/yuv76/AI-SL/tree/client_ASL_chat).
 
-## Results
+## Demonstration
+ - model
+  [![ezgif-101319c1157467](https://github.com/user-attachments/assets/886b500e-9663-4f31-aca3-e86bc4f257af)](https://youtu.be/1_T0wYiwtE0)
+
+ - chat
+   
